@@ -8,12 +8,12 @@ but in the process of development more complex features were added.
 The application runs a server on which a client application can send packages via a TCP connection and change the status of the parking spots. The messages are filtered accordingly. This project is hereby a prototype for an application that could work with ground sensors for a 24/7 self-monitoring parking lot, where availability of every spot is known at all times.
 
 Features:
-Parking Lot/Zones/Spots visual representation
-Capacity meter
-Reset button
-Select zone button
-Lot settings button
-Functional server implementation
+Parking Lot/Zones/Spots visual representation -
+Capacity meter -
+Reset button - 
+Select zone button -
+Lot settings button -
+Functional server implementation.
 
 This project was my first contact with - among other things - multithreading, custom events, eventListeners and eventHandlers, TCP client/server communication and message filtering.   
 
