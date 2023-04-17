@@ -150,7 +150,7 @@ public class parkingServer implements Runnable {
 	}
 
 	public boolean checkLength(String str, int upperLimit, int lowerLimit) {
-		if(str.length() > upperLimit && str.length() < lowerLimit) return false;
+		if(str.length() > upperLimit || str.length() < lowerLimit) return false;
 		else return true;
 	}
 
