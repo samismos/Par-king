@@ -22,8 +22,6 @@ public class parkingServer implements Runnable {
 
 	private static int NUM_ZONES;
 	private static int SPOTS_PER_ZONE;
-	private String clientMessage = null;
-	private String response = null;
 	private int spotID;
 	private int zoneID;
 	private int port;
@@ -54,10 +52,8 @@ public class parkingServer implements Runnable {
 	}
 
 	public void run() {
-		//serverSocket.bind(new InetSocketAddress("localhost", port));
-		//serverSocket.setReuseAddress(true);
 		System.out.println("Server started on port "+port);
-		System.out.println("Server Bound : "+serverSocket.isBound()+" to port : "+serverSocket.getLocalPort());
+		//System.out.println("Server Bound : "+serverSocket.isBound()+" to port : "+serverSocket.getLocalPort());
 		while (true) {
 			// Using a try-with-resources block in order to ensure proper resource closing
 			try(    // Wait for a client to connect
@@ -77,14 +73,13 @@ public class parkingServer implements Runnable {
 				output.println(spots);
 				output.println(instructions);
 				output.println(exit);
-				this.response = greeting;
 
 				// Read message from the client
 				while(true) {
 					String message = input.readLine().toUpperCase();
 					if(message != null) {
 						//calling ValidateString to filter messages and only receive good data, e.g. A12, B8, C10
-						if(validateString(message.toUpperCase(), output)) {
+						if(validateString(message, output)) {
 							System.out.println("Spot info acquired successfully.");
 							dataStored = !dataStored;
 						}
@@ -93,10 +88,12 @@ public class parkingServer implements Runnable {
 
 					//close connection on "EXIT" message
 					if(message.equals("EXIT")) {
-						// Break the loop, closing the resources
+						// close the connection socket, execute run() method so that 
 						System.out.println("Connection exited by client.");
-						stop();
-						break;
+						//stop();
+						socket.close();
+						run();
+						//break;
 					}
 				}
 
@@ -214,7 +211,6 @@ public class parkingServer implements Runnable {
 				output.println("Invalid message format for message : "+message);
 			}
 			System.out.println("Received from client: " + message+"\n");
-			this.clientMessage = message;
 		}
 		return false;
 	}
@@ -225,13 +221,6 @@ public class parkingServer implements Runnable {
 			System.out.println("Server stopped.");	
 		}
 
-	}
-
-	public String getClientMessage() {
-		return clientMessage;
-	}
-	public String getResponse() {
-		return response;
 	}
 	public int getSpotID() {
 		return spotID;

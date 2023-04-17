@@ -45,7 +45,7 @@ public class Client {
 				if (sc.hasNextLine()) {
 					String message = sc.nextLine();
 					output.println(message);
-					if(message.equals("EXIT")) {
+					if(message.toUpperCase().equals("EXIT")) {
 						sc.close();
 						break;
 					}

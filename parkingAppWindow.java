@@ -21,7 +21,7 @@ public class parkingAppWindow {
 	//using global constants for zones in the lot, as well as spots per zone.
 	static int NUM_ZONES = 8; //ALWAYS EQUAL TO OR LESS THAN 26 due to alphabetical constraints
 	static int SPOTS_PER_ZONE = 10; //spots per parking zone, modify at will, no limits, however the top row might trim the top spots after VALUE=32;
-
+	boolean closeApp;
 	//initializing variables grouped for access and easier modification and experimentation 
 
 	//X_BUTTON_INCREMENT is the HORIZONTAL distance between two parking spots in the same zone, e.g. A1 and A2
@@ -33,8 +33,7 @@ public class parkingAppWindow {
 	//X_ZONE_INCREMENT is the HORIZONTAL distance between TWO PARKING ZONES
 	int X_ZONE_INCREMENT = 300;
 
-	//Y_ZONE_INCREMENT is the VERTICAL DISTANCE BETWEEN TWO PARKING ZONES
-	int Y_ZONE_INCREMENT = (SPOTS_PER_ZONE/2)*60;
+
 
 	//Shell Dimensions
 	int SHELL_WIDTH = 1450;
@@ -64,7 +63,7 @@ public class parkingAppWindow {
 	 */
 	public void open() throws IOException {
 		Display display = Display.getDefault();
-		createContents(display);
+		createContents(display, NUM_ZONES, SPOTS_PER_ZONE);
 		shlParkingApplication.open();
 		shlParkingApplication.layout();
 		while (!shlParkingApplication.isDisposed()) {
@@ -78,9 +77,11 @@ public class parkingAppWindow {
 	 * Create contents of the window.
 	 * @throws IOException 
 	 */
-	protected void createContents(Display display) throws IOException {
+	protected void createContents(Display display, int NUM_ZONES, int SPOTS_PER_ZONE) throws IOException {
 		//MAIN METHOD, INITIALIZING PARKING LOT, ZONES AND SPOTS, SETTING STATUS TO AVAILABLE.
 		parkingLot lot = new parkingLot(NUM_ZONES, SPOTS_PER_ZONE);
+		//Y_ZONE_INCREMENT is the VERTICAL DISTANCE BETWEEN TWO PARKING ZONES
+		int Y_ZONE_INCREMENT = (SPOTS_PER_ZONE/2)*60;
 		shlParkingApplication = new Shell();
 		shlParkingApplication.setBackground(SWTResourceManager.getColor(73, 104, 175));
 		shlParkingApplication.setSize(SHELL_WIDTH,SHELL_HEIGHT);
@@ -121,23 +122,28 @@ public class parkingAppWindow {
 		DataStoredListener listener = new DataStoredListener(server, lot, display, lblCapacity);
 		Thread listenerThread = new Thread(listener);
 		listenerThread.start();
-		
-		//Adding a listener to close server resources when window is disposed
+
+		//closeApp parameter used to distinguish window disposal from reset button and setting changes
+		closeApp = true;
+		//Adding a listener to close resources properly when window is disposed
 		shlParkingApplication.addDisposeListener(new DisposeListener(){
 
 			@Override
 			public void widgetDisposed(DisposeEvent arg0) {
 				// TODO Auto-generated method stub
 				try {
-					System.out.println("Closed UI window.");
-					//TimeUnit.SECONDS.sleep(1);
+					//close server resources
 					server.stop();
 					//listenerThread.interrupt();
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-
+				if(closeApp == true) {
+					System.out.println("Application exited successfully.");
+					//application exited successfully
+					System.exit(0);
+				}
 
 			}
 
@@ -145,7 +151,6 @@ public class parkingAppWindow {
 
 
 		//creating the scrolled Composite which will display our parking lot
-
 		ScrolledComposite scrolledComp = new ScrolledComposite(shlParkingApplication, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL);
 		scrolledComp.setAlwaysShowScrollBars(false);
 		scrolledComp.setBounds(10, 60, 1280, 720);
@@ -168,7 +173,7 @@ public class parkingAppWindow {
 
 		/*MAIN ALGORITHM
 		 * The following algorithm uses a nested for-loop to generate parking zones of buttons which represent parking spots.
-		 * For every iteration, the X and Y of the button change so that they create a nice formation. 
+		 * For every iteration, the X and Y of the button change so that they create an optically nice formation. 
 		 * When we move on to the next zone, the "buttonY" is reset to the startingY, and the startingX changes accordingly.
 		 * 
 		 * When we create 4 zones, the startingX is reset and the startingY is modified to display the next quarter of zones below the first one.
@@ -180,12 +185,19 @@ public class parkingAppWindow {
 
 		for(int i=0; i < NUM_ZONES; i++) {
 			if(i%4==0 && i!=0) {
+				//setting X=60 and proper height for subsequent rows of zones
+				//resetting X to starting X
 				startingX = 60;
+				//setting the startingY lower to create the second row below the first one
 				startingY = startingY + Y_ZONE_INCREMENT;
 				buttonY=startingY;
 
 			}
 			for(int j=0; j < SPOTS_PER_ZONE; j++) {
+
+				//creation of the parking spot buttons consists of the 
+				//position of the button, its association with a parking spot, 
+				//and the addition of the mouseListener
 				Button btnA = new Button(content, SWT.NONE);
 				if( j%2 == 0 ) {
 					buttonX=startingX;
@@ -196,6 +208,7 @@ public class parkingAppWindow {
 				if(j%2 == 0 && j!=0) {
 					buttonY = buttonY - Y_BUTTON_DECREMENT;
 				}
+				//setting button color
 				if(lot.getZone(i).getSpot(j).isAvailable()) {
 					btnA.setBackground(SWTResourceManager.getColor(0, 255, 0));
 				}
@@ -203,6 +216,7 @@ public class parkingAppWindow {
 					btnA.setBackground(SWTResourceManager.getColor(255,0,0));
 				}
 				btnA.setBounds(buttonX, buttonY, 90, 30);
+				//button text is ZoneID + SpotID
 				btnA.setText(zoneLetter[i]+" "+ (j+1));
 
 
@@ -212,7 +226,7 @@ public class parkingAppWindow {
 				btnA.addMouseListener(new MouseAdapter() {
 					@Override
 					public void mouseDown(MouseEvent e) {
-						//changing status and color on click, refreshing capacity meter
+						//changing status (and color) on click, refreshing capacity meter
 						lot.getZone(innerI).getSpot(innerJ).setStatus(!lot.getZone(innerI).getSpot(innerJ).isAvailable());
 						lot.updateCurrentCapacity(lblCapacity);
 					}
@@ -231,6 +245,7 @@ public class parkingAppWindow {
 			@Override
 			public void mouseDown(MouseEvent e) {
 				if(MessageDialog.openConfirm(shlParkingApplication, "Reset Confirm", "Are you sure you want to reset this program?")) {
+					closeApp = false;
 					//If user clicks OK, re-run application 
 					try {
 						server.stop();
@@ -240,7 +255,7 @@ public class parkingAppWindow {
 					}
 					shlParkingApplication.close();
 					try {
-						createContents(display);
+						createContents(display, NUM_ZONES, SPOTS_PER_ZONE);
 					} catch (IOException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
@@ -288,6 +303,28 @@ public class parkingAppWindow {
 			@Override
 			public void mouseDown(MouseEvent e) {
 				//CALL DIALOG FOR ZONES AND SPOTS INPUT
+				LotSettingsDialog dialog = new LotSettingsDialog(shlParkingApplication);
+
+				if(dialog.open() == Window.OK) {
+					//We read values from the combo boxes for num_zones and spots_per_zone
+					//If user clicks OK, re-run application with new parameters
+					closeApp = false;
+					try {
+						server.stop();
+					} catch (IOException e2) {
+						// TODO Auto-generated catch block
+						e2.printStackTrace();
+					}
+					shlParkingApplication.close();
+					try {
+						createContents(display , dialog.getZoneNumber(), dialog.getSpotsPerZone());
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					shlParkingApplication.open();
+					shlParkingApplication.layout();
+				}
 			}	
 
 		});

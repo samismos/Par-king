@@ -49,27 +49,24 @@ public class DataStoredListener implements Runnable {
 				//System.out.println("Previous value is: "+previousValue.get());
 				//if value has CHANGED, then execute task
 				if (currentValue != previousValue.get()) {
-					System.out.println("CHANGE DETECTED: "+currentValue+" & "+previousValue.get());
 					//function which updates UI and spot status
 					onDataStoredChanged();
 					//updates status
 					previousValue.set(currentValue);
-					//shut down executorService
-					//executorService.shutdown();
 				}
 			}
 		}, 0, 1000, TimeUnit.MILLISECONDS); // Schedule the task to run every 1 second
 
 		// Wait for the executor service to terminate
 		while (!executorService.isTerminated()) {
-			 while (!Thread.interrupted()) {
-			try {
-				Thread.sleep(100);
-			} catch (InterruptedException e) {
-				System.err.println("DataStoredListener Thread was interrupted while sleeping");
-				e.printStackTrace();
+			while (!Thread.interrupted()) {
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException e) {
+					System.err.println("DataStoredListener Thread was interrupted while sleeping");
+					e.printStackTrace();
+				}
 			}
-			 }
 		}
 	}
 }
