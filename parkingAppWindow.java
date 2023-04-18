@@ -18,11 +18,11 @@ import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 
 public class parkingAppWindow {
-	
+
 	static int NUM_ZONES = 8; // between 1-26 for alphabetical constraints
 	static int SPOTS_PER_ZONE = 10; // spots per parking zone, for optimal performance keep it less or equal to 32, but you can experiment with much higher values
 	boolean closeApp;
-	
+
 	//Shell Dimensions
 	int SHELL_WIDTH = 1450;
 	int SHELL_HEIGHT = 775;
@@ -64,9 +64,9 @@ public class parkingAppWindow {
 	 * @throws IOException 
 	 */
 	protected void createContents(Display display, int NUM_ZONES, int SPOTS_PER_ZONE) throws IOException {
-		
+
 		parkingLot lot = new parkingLot(NUM_ZONES, SPOTS_PER_ZONE); 
-		
+
 		//X_BUTTON_INCREMENT is the HORIZONTAL distance between two parking spots in the same zone, e.g. A1 and A2
 		int X_BUTTON_INCREMENT = 100;
 
@@ -75,40 +75,37 @@ public class parkingAppWindow {
 
 		//X_ZONE_INCREMENT is the HORIZONTAL distance between TWO PARKING ZONES
 		int X_ZONE_INCREMENT = 300;
-		
+
 		//Y_ZONE_INCREMENT is the VERTICAL DISTANCE BETWEEN TWO PARKING ZONES
 		int Y_ZONE_INCREMENT = (SPOTS_PER_ZONE/2)*60;
-		
+
 		shlParkingApplication = new Shell();
 		shlParkingApplication.setBackground(SWTResourceManager.getColor(73, 104, 175));
 		shlParkingApplication.setSize(SHELL_WIDTH,SHELL_HEIGHT);
 		shlParkingApplication.setText("Parking Application");
 
-		// server initialization in separate thread to not interrupt UI thread
+		// Server initialization in separate thread to not interrupt UI thread
 		parkingServer server = new parkingServer(6709, NUM_ZONES, SPOTS_PER_ZONE);
 		Thread serverThread = new Thread(server);
 		serverThread.start();
 
-
-
-		//Logo label
+		// Logo label
 		Label lblWelcomeToOur = new Label(shlParkingApplication, SWT.NONE);
 		lblWelcomeToOur.setBackground(SWTResourceManager.getColor(73, 104, 175));
 		lblWelcomeToOur.setAlignment(SWT.CENTER);
 		lblWelcomeToOur.setForeground(SWTResourceManager.getColor(255, 255, 255));
 		lblWelcomeToOur.setFont(SWTResourceManager.getFont("Gill Sans Ultra Bold", 17, SWT.NORMAL));
-
 		lblWelcomeToOur.setBounds(10, 10, 314, 49);
 		lblWelcomeToOur.setText("PAR 👑 KING ");
 
-		//Text which displays capacity at all times, initialized here and changed on all click events on the parking spots
+		// Text which displays capacity at all times, initialized here and changed on all click events on the parking spots
 		Label lblCapacity = new Label(shlParkingApplication, SWT.NONE);
 		lblCapacity.setForeground(SWTResourceManager.getColor(255, 255, 255));
 		lblCapacity.setBackground(SWTResourceManager.getColor(73, 104, 175));
 		lblCapacity.setFont(SWTResourceManager.getFont("Gill Sans Ultra Bold", 12, SWT.NORMAL));
 		lblCapacity.setBounds(481, 20, 581, 29);
-		//calling Lot function to update the content of the label based on current capacity
-		lot.updateCurrentCapacity(lblCapacity);
+
+		lot.updateCurrentCapacity(lblCapacity); // calling Lot function to update the content of the label based on current capacity
 
 
 		/*
@@ -120,32 +117,22 @@ public class parkingAppWindow {
 		Thread listenerThread = new Thread(listener);
 		listenerThread.start();
 
-		//closeApp parameter used to distinguish window disposal from reset button and setting changes
-		closeApp = true;
-		//Adding a listener to close resources properly when window is disposed
-		shlParkingApplication.addDisposeListener(new DisposeListener(){
+		closeApp = true; // closeApp parameter used to distinguish window disposal from reset button and setting changes
 
+		shlParkingApplication.addDisposeListener(new DisposeListener(){ // Adding a listener to close resources properly when window is disposed
 			@Override
 			public void widgetDisposed(DisposeEvent arg0) {
-				// TODO Auto-generated method stub
 				try {
-					//close server resources
-					server.stop();
-					//listenerThread.interrupt();
+					server.stop(); //close server resources
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 				if(closeApp == true) {
 					System.out.println("Application exited successfully.");
-					//application exited successfully
 					System.exit(0);
 				}
-
 			}
-
 		});
-
 
 		//creating the scrolled Composite which will display our parking lot
 		ScrolledComposite scrolledComp = new ScrolledComposite(shlParkingApplication, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL);
@@ -153,7 +140,6 @@ public class parkingAppWindow {
 		scrolledComp.setBounds(10, 60, 1280, 720);
 		scrolledComp.setExpandHorizontal(true);
 		scrolledComp.setExpandVertical(true);
-
 		//generating height based on No of Zones and Spots per zone, making scroll field "responsive" instead of fixed size
 		int scrollHeight = (((NUM_ZONES+1)/4)*(30+Y_BUTTON_DECREMENT)*((SPOTS_PER_ZONE+1)/2));
 		scrolledComp.setMinSize(1200,scrollHeight);
@@ -170,11 +156,10 @@ public class parkingAppWindow {
 
 		/*MAIN ALGORITHM
 		 * The following algorithm uses a nested for-loop to generate parking zones of buttons which represent parking spots.
-		 * For every iteration, the X and Y of the button change so that they create an optically nice formation. 
+		 * For every iteration, the X and Y of the button change so that they create two columns of buttons. 
 		 * When we move on to the next zone, the "buttonY" is reset to the startingY, and the startingX changes accordingly.
 		 * 
-		 * When we create 4 zones, the startingX is reset and the startingY is modified to display the next quarter of zones below the first one.
-		 * 
+		 * When we create 4 zones, the startingX is reset and the startingY is modified to display the next row of zones below the first one.
 		 */
 		int buttonX=0, buttonY=0;
 		char[] zoneLetter = {'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'};
@@ -182,16 +167,11 @@ public class parkingAppWindow {
 
 		for(int i=0; i < NUM_ZONES; i++) {
 			if(i%4==0 && i!=0) {
-				//setting X=60 and proper height for subsequent rows of zones
-				//resetting X to starting X
-				startingX = 60;
-				//setting the startingY lower to create the second row below the first one
-				startingY = startingY + Y_ZONE_INCREMENT;
+				startingX = 60; // resetting X to starting X
+				startingY = startingY + Y_ZONE_INCREMENT; // setting the startingY lower to create the second row below the first one
 				buttonY=startingY;
-
 			}
 			for(int j=0; j < SPOTS_PER_ZONE; j++) {
-
 				//creation of the parking spot buttons consists of the 
 				//position of the button, its association with a parking spot, 
 				//and the addition of the mouseListener
@@ -213,13 +193,11 @@ public class parkingAppWindow {
 					btnA.setBackground(SWTResourceManager.getColor(255,0,0));
 				}
 				btnA.setBounds(buttonX, buttonY, 90, 30);
-				//button text is ZoneID + SpotID
-				btnA.setText(zoneLetter[i]+" "+ (j+1));
-
+				btnA.setText(zoneLetter[i]+" "+ (j+1)); // button text is ZoneID + SpotID
 
 				final int innerI = i;
 				final int innerJ = j;
-				//change parkingSpot status on click
+
 				btnA.addMouseListener(new MouseAdapter() {
 					@Override
 					public void mouseDown(MouseEvent e) {
@@ -229,15 +207,16 @@ public class parkingAppWindow {
 					}
 				});
 				lot.getZone(i).getSpot(j).setButton(btnA);
-			}//end of inner for
-
+			}
 			startingX = startingX + X_ZONE_INCREMENT;
 			buttonY = startingY;
 		}
 
-		//RESET BUTTON : Button which clears all occupied spots
+		//RESET : Button which clears all occupied spots
 		Button btnClearAll = new Button(shlParkingApplication, SWT.NONE);
 		btnClearAll.setFont(SWTResourceManager.getFont("Segoe UI", 10, SWT.BOLD));
+		btnClearAll.setBounds(1313, 85, 90, 30);
+		btnClearAll.setText("RESET");
 		btnClearAll.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseDown(MouseEvent e) {
@@ -247,51 +226,37 @@ public class parkingAppWindow {
 					try {
 						server.stop();
 					} catch (IOException e2) {
-						// TODO Auto-generated catch block
 						e2.printStackTrace();
 					}
 					shlParkingApplication.close();
 					try {
 						createContents(display, NUM_ZONES, SPOTS_PER_ZONE);
 					} catch (IOException e1) {
-						// TODO Auto-generated catch block
 						e1.printStackTrace();
 					}
 					shlParkingApplication.open();
 					shlParkingApplication.layout();
-
 				}	
 			}
 		});
 
-		btnClearAll.setBounds(1313, 85, 90, 30);
-		btnClearAll.setText("RESET");
-
 		//SELECT ZONE : Button selecting a zone, then setting all selected spots to free or occupied.		
 		Button btnSelectZone = new Button(shlParkingApplication, SWT.NONE);
 		btnSelectZone.setFont(SWTResourceManager.getFont("Segoe UI", 10, SWT.BOLD));
+		btnSelectZone.setBounds(1300, 163, 120, 30);
+		btnSelectZone.setText("SELECT ZONE");
 		btnSelectZone.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseDown(MouseEvent e) {
-				//ACTION
-				/*
-				 * Calling a dialog that returns a zoneID and status
-				 */
-				ZoneSelectionDialog dialog = new ZoneSelectionDialog(shlParkingApplication, lot);
-
-				if( dialog.open() == Window.OK) {
-					//We use the returned values to call the setZoneStatus method and set the status for all the spots in the zone
+				ZoneSelectionDialog dialog = new ZoneSelectionDialog(shlParkingApplication, lot); // Calling a dialog that returns a zoneID and status
+				
+				if(dialog.open() == Window.OK) { 
 					lot.getZone(dialog.getZoneID()).setZoneStatus(dialog.getStatus());
 				}
-				//Updating the capacity meter
-				lot.updateCurrentCapacity(lblCapacity);	
+				lot.updateCurrentCapacity(lblCapacity); // Updating the capacity meter	
 			}	
-
 		});
-		btnSelectZone.setBounds(1300, 163, 120, 30);
-		btnSelectZone.setText("SELECT ZONE");
-
-
+	
 		Button btnLotSettings = new Button(shlParkingApplication, SWT.NONE);
 		btnLotSettings.setFont(SWTResourceManager.getFont("Segoe UI", 10, SWT.BOLD));
 		btnLotSettings.setBounds(1298, 252, 125, 30);
@@ -299,24 +264,21 @@ public class parkingAppWindow {
 		btnLotSettings.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseDown(MouseEvent e) {
-				//CALL DIALOG FOR ZONES AND SPOTS INPUT
-				LotSettingsDialog dialog = new LotSettingsDialog(shlParkingApplication);
-
+				
+				LotSettingsDialog dialog = new LotSettingsDialog(shlParkingApplication); // Calling a dialog that returns num_zones and spots_per_zone 
+				
 				if(dialog.open() == Window.OK) {
-					//We read values from the combo boxes for num_zones and spots_per_zone
 					//If user clicks OK, re-run application with new parameters
 					closeApp = false;
 					try {
 						server.stop();
 					} catch (IOException e2) {
-						// TODO Auto-generated catch block
 						e2.printStackTrace();
 					}
 					shlParkingApplication.close();
 					try {
 						createContents(display , dialog.getZoneNumber(), dialog.getSpotsPerZone());
 					} catch (IOException e1) {
-						// TODO Auto-generated catch block
 						e1.printStackTrace();
 					}
 					shlParkingApplication.open();
@@ -325,15 +287,5 @@ public class parkingAppWindow {
 			}	
 
 		});
-
-
-	}//createContents() END
-
-
-
+	}
 }
-
-
-
-
-

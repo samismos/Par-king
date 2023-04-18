@@ -36,18 +36,16 @@ public class DataStoredListener implements Runnable {
 
 	@Override
 	public void run() {
-		// set a boolean value and listen for changes in that value
-		AtomicBoolean previousValue = new AtomicBoolean(server.isDataStored());
+		
+		AtomicBoolean previousValue = new AtomicBoolean(server.isDataStored()); // set a boolean value and listen for changes in that value
 
-		// use a ScheduledExecutorService to schedule the task at fixed intervals
-		ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+		ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(); // use a ScheduledExecutorService to schedule the task at fixed intervals
 		executorService.scheduleWithFixedDelay(new Runnable() {
 			@Override
 			public void run() {				
 				boolean currentValue = server.isDataStored(); // read new value of isDataStored()
 				
-				if (currentValue != previousValue.get()) {
-					// if value of isDataStored has CHANGED, then execute task
+				if (currentValue != previousValue.get()) { // if value of isDataStored has CHANGED, update relevant spot
 					onDataStoredChanged();
 					previousValue.set(currentValue);
 				}
