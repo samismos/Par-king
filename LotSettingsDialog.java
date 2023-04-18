@@ -10,9 +10,9 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+
 public class LotSettingsDialog extends TitleAreaDialog{
 
-	
 	private Combo comboZoneNumber;
 	private Combo comboSpotsPerZone;
 	private int numZones;
@@ -44,13 +44,13 @@ public class LotSettingsDialog extends TitleAreaDialog{
 	}
 
 	private void createSelectZoneNumber(Composite container) {
+		// select zone number label
 		Label lbtSelectZone = new Label(container, SWT.NONE);
 		lbtSelectZone.setText("Select number of zones:");
-		//Combo box 
+		// combo box
 		Combo comboZoneNumber= new Combo(container, SWT.BORDER | SWT.DROP_DOWN | SWT.READ_ONLY);
 		comboZoneNumber.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		comboZoneNumber.setVisibleItemCount(8);
-		// Add items to the combo box
 		for(int i=0; i < 26; i++) {
 			comboZoneNumber.add(Integer.toString(i+1));
 		}
@@ -59,21 +59,19 @@ public class LotSettingsDialog extends TitleAreaDialog{
 	}
 
 	private void createSelectSpotsPerZone(Composite container) {
+		// select spots per zone label
 		Label lbtSelectSpotsPerZone = new Label(container, SWT.NONE);
 		lbtSelectSpotsPerZone.setText("Select number of spots per zone:");
-		//Combo box 
+		// combo box 
 		Combo comboSpotsPerZone= new Combo(container, SWT.BORDER | SWT.DROP_DOWN | SWT.READ_ONLY);
 		comboSpotsPerZone.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		comboSpotsPerZone.setVisibleItemCount(8);
-		// Add items to the combo box
 		for(int i=0; i < 32; i++) {
 			comboSpotsPerZone.add(Integer.toString(i+1));
 		}
 		comboSpotsPerZone.select(9);
 		this.comboSpotsPerZone = comboSpotsPerZone;
 	}
-
-
 
 	@Override
 	protected boolean isResizable() {
@@ -82,15 +80,13 @@ public class LotSettingsDialog extends TitleAreaDialog{
 
 	
 	private void saveInput() {
-		// save content of combo boxes
-		// as soon as the Dialog closes
 		numZones = comboZoneNumber.getSelectionIndex()+1; 
 		spots_per_zone = comboSpotsPerZone.getSelectionIndex()+1;
 	}
 
 	@Override
 	protected void okPressed() {
-		saveInput();
+		saveInput(); // save selections as soon as dialog is exited
 		super.okPressed();
 	}
 
@@ -102,11 +98,3 @@ public class LotSettingsDialog extends TitleAreaDialog{
 		return spots_per_zone;
 	}
 }
-
-
-
-
-
-
-
-	

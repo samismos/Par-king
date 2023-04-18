@@ -18,23 +18,11 @@ import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 
 public class parkingAppWindow {
-	//using global constants for zones in the lot, as well as spots per zone.
-	static int NUM_ZONES = 8; //ALWAYS EQUAL TO OR LESS THAN 26 due to alphabetical constraints
-	static int SPOTS_PER_ZONE = 10; //spots per parking zone, modify at will, no limits, however the top row might trim the top spots after VALUE=32;
+	
+	static int NUM_ZONES = 8; // between 1-26 for alphabetical constraints
+	static int SPOTS_PER_ZONE = 10; // spots per parking zone, for optimal performance keep it less or equal to 32, but you can experiment with much higher values
 	boolean closeApp;
-	//initializing variables grouped for access and easier modification and experimentation 
-
-	//X_BUTTON_INCREMENT is the HORIZONTAL distance between two parking spots in the same zone, e.g. A1 and A2
-	int X_BUTTON_INCREMENT = 100;
-
-	//Y_BUTTON_INCREMENT is the VERTICAL distance between two parking spots in the same zone, e.g A1 and A3
-	int Y_BUTTON_DECREMENT = 40;
-
-	//X_ZONE_INCREMENT is the HORIZONTAL distance between TWO PARKING ZONES
-	int X_ZONE_INCREMENT = 300;
-
-
-
+	
 	//Shell Dimensions
 	int SHELL_WIDTH = 1450;
 	int SHELL_HEIGHT = 775;
@@ -53,8 +41,6 @@ public class parkingAppWindow {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
-
 	}
 
 	/**
@@ -78,17 +64,28 @@ public class parkingAppWindow {
 	 * @throws IOException 
 	 */
 	protected void createContents(Display display, int NUM_ZONES, int SPOTS_PER_ZONE) throws IOException {
-		//MAIN METHOD, INITIALIZING PARKING LOT, ZONES AND SPOTS, SETTING STATUS TO AVAILABLE.
-		parkingLot lot = new parkingLot(NUM_ZONES, SPOTS_PER_ZONE);
+		
+		parkingLot lot = new parkingLot(NUM_ZONES, SPOTS_PER_ZONE); 
+		
+		//X_BUTTON_INCREMENT is the HORIZONTAL distance between two parking spots in the same zone, e.g. A1 and A2
+		int X_BUTTON_INCREMENT = 100;
+
+		//Y_BUTTON_INCREMENT is the VERTICAL distance between two parking spots in the same zone, e.g A1 and A3
+		int Y_BUTTON_DECREMENT = 40;
+
+		//X_ZONE_INCREMENT is the HORIZONTAL distance between TWO PARKING ZONES
+		int X_ZONE_INCREMENT = 300;
+		
 		//Y_ZONE_INCREMENT is the VERTICAL DISTANCE BETWEEN TWO PARKING ZONES
 		int Y_ZONE_INCREMENT = (SPOTS_PER_ZONE/2)*60;
+		
 		shlParkingApplication = new Shell();
 		shlParkingApplication.setBackground(SWTResourceManager.getColor(73, 104, 175));
 		shlParkingApplication.setSize(SHELL_WIDTH,SHELL_HEIGHT);
 		shlParkingApplication.setText("Parking Application");
 
+		// server initialization in separate thread to not interrupt UI thread
 		parkingServer server = new parkingServer(6709, NUM_ZONES, SPOTS_PER_ZONE);
-		//server.init();
 		Thread serverThread = new Thread(server);
 		serverThread.start();
 

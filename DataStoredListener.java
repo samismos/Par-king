@@ -13,6 +13,7 @@ public class DataStoredListener implements Runnable {
 	private parkingLot lot;
 	private Display display;
 	private Label lblCapacity;
+
 	public DataStoredListener(parkingServer server, parkingLot lot, Display display, Label lblCapacity) {
 		this.server = server;
 		this.lot = lot;
@@ -21,11 +22,11 @@ public class DataStoredListener implements Runnable {
 	}
 
 	public void onDataStoredChanged() {
-		//UI thread to perform visual changes in the parking buttons
+		//UI thread to visually update the parking buttons
 		display.asyncExec(new Runnable() {
 			@Override
 			public void run() {
-				//sets status to !previousStatus
+				// changes spot status to the opposite
 				boolean previousStatus = lot.getZone(server.getZoneID()).getSpot(server.getSpotID()).isAvailable();
 				lot.getZone(server.getZoneID()).getSpot(server.getSpotID()).setStatus(!previousStatus);
 				lot.updateCurrentCapacity(lblCapacity);
@@ -35,23 +36,19 @@ public class DataStoredListener implements Runnable {
 
 	@Override
 	public void run() {
-		//set a boolean value and listen for changes in that value
+		// set a boolean value and listen for changes in that value
 		AtomicBoolean previousValue = new AtomicBoolean(server.isDataStored());
 
 		// use a ScheduledExecutorService to schedule the task at fixed intervals
 		ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
 		executorService.scheduleWithFixedDelay(new Runnable() {
 			@Override
-			public void run() {
-				//read new value of isDataStored()
-				boolean currentValue = server.isDataStored();
-				//System.out.println("Current value is: "+currentValue);
-				//System.out.println("Previous value is: "+previousValue.get());
-				//if value has CHANGED, then execute task
+			public void run() {				
+				boolean currentValue = server.isDataStored(); // read new value of isDataStored()
+				
 				if (currentValue != previousValue.get()) {
-					//function which updates UI and spot status
+					// if value of isDataStored has CHANGED, then execute task
 					onDataStoredChanged();
-					//updates status
 					previousValue.set(currentValue);
 				}
 			}

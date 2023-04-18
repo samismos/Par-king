@@ -9,15 +9,10 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
-
-
-
 public class parkingServer implements Runnable {
 	/*
-	 * ADDING A CONNECTION HANDLER
 	 * Initializing a TCP connection socket through which the application can receive a packet
 	 * with information about the spots 
-	 * 
 	 */
 
 	private static int NUM_ZONES;
@@ -25,11 +20,8 @@ public class parkingServer implements Runnable {
 	private int spotID;
 	private int zoneID;
 	private int port;
-
-	//private boolean dataStored=false;
 	private boolean dataStored=false;
 	private List<DataStoredListener> listeners = new ArrayList<>();
-
 	private ServerSocket serverSocket;
 	private char[] zoneLetter = {'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'};
 
@@ -39,10 +31,8 @@ public class parkingServer implements Runnable {
 		NUM_ZONES = zones;
 		SPOTS_PER_ZONE = spots;
 		try {
-			this.serverSocket = new ServerSocket(port);
-			//System.out.println("ServerSocket initialized in parkingServer constructor");
+			this.serverSocket = new ServerSocket(port); 
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -53,16 +43,15 @@ public class parkingServer implements Runnable {
 
 	public void run() {
 		System.out.println("Server started on port "+port);
-		//System.out.println("Server Bound : "+serverSocket.isBound()+" to port : "+serverSocket.getLocalPort());
 		while (true) {
-			// Using a try-with-resources block in order to ensure proper resource closing
-			try(    // Wait for a client to connect
-					Socket socket = serverSocket.accept();
-					// Create input and output streams for the socket
+			try(    // Using a try-with-resources block in order to ensure proper resource closing
+					Socket socket = serverSocket.accept(); // Wait for a client to connect
+					// Initialize input and output streams for the socket
 					BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 					PrintWriter output = new PrintWriter(socket.getOutputStream(), true)){
 				System.out.println("Client connected: " + socket.getInetAddress().getHostAddress());
-				// Send a greeting message to the client
+				
+				// Send welcome message to the client with information about the parking lot
 				String greeting = "Client IP address is: " +socket.getInetAddress().getHostAddress();
 				String zones = "Zones: "+zoneLetter[0]+"-"+zoneLetter[NUM_ZONES-1];
 				String spots = "Spots per zone: 1-"+SPOTS_PER_ZONE;
@@ -74,42 +63,34 @@ public class parkingServer implements Runnable {
 				output.println(instructions);
 				output.println(exit);
 
-				// Read message from the client
+				
 				while(true) {
-					String message = input.readLine().toUpperCase();
+					String message = input.readLine().toUpperCase(); // Read message from the client and capitalize
 					if(message != null) {
-						//calling ValidateString to filter messages and only receive good data, e.g. A12, B8, C10
-						if(validateString(message, output)) {
+						if(validateString(message, output)) { // Calling ValidateString to filter messages and only receive good data, e.g. A12, B8, C10
 							System.out.println("Spot info acquired successfully.");
-							dataStored = !dataStored;
+							dataStored = !dataStored; // Changing value of dataStored to trigger the DataStoredListener
 						}
 					}
 					else continue;
 
-					//close connection on "EXIT" message
-					if(message.equals("EXIT")) {
-						// close the connection socket, execute run() method so that 
+					
+					if(message.equals("EXIT")) { // Close connection on "EXIT" message
+						 
 						System.out.println("Connection exited by client.");
-						//stop();
-						socket.close();
-						run();
-						//break;
+						socket.close(); // close the client connection socket
+						run(); // execute run to keep listening for new client connections
 					}
 				}
 
 			}
-			catch (IOException e) {
-				//System.err.println("Error while starting the server: " + e.getMessage());				
+			catch (IOException e) {				
 				break;
 			}
 			
 		}
 
 	}
-
-
-
-
 
 
 	public boolean isDataStored() {
@@ -155,13 +136,11 @@ public class parkingServer implements Runnable {
 	}
 
 	public boolean isZoneValid(String str) {
-		/*
-		 * Creating a new array that will hold only the letters of the zones currently in use by the system.
-		 */
+		 // Creating a new array that will hold only the letters of the zones currently in use by the system.
 		char[] usedZones = new char[NUM_ZONES];
 		System.arraycopy(zoneLetter, 0, usedZones, 0, NUM_ZONES);
 		String temp = new String(usedZones);
-		if(temp.indexOf(Character.toUpperCase(str.charAt(0))) != -1) {
+		if(temp.indexOf(Character.toUpperCase(str.charAt(0))) != -1) { // if index of letter in usedZones array is -1, it is NOT an element of the array
 			zoneID = temp.indexOf(Character.toUpperCase(str.charAt(0)));
 			return true;
 		}
@@ -179,24 +158,19 @@ public class parkingServer implements Runnable {
 		if(message != null) {
 
 			if(checkFormat(message)) {
-				//checking length to be less than 4
+				//checking length to be between 2 and 4 characters
 				if( !checkLength(message, 4, 2) ) {
 					System.out.println("Inappropriate message length.");
 					output.println("Inappropriate message length.");
 				}
 				else {
-					//Message has proper format, and is between 2 and 4 characters
+					// since message has proper length and format, extract number value (spotID) and validate zone and spot IDs
 					String numberPart = extractNumber(message);
 					if (!numberPart.isEmpty()) {
 						int number = Integer.parseInt(numberPart);
 						if(isSpotValid(number) && isZoneValid(message)) {
 							System.out.println("Valid spot is "+Character.toUpperCase(message.charAt(0)) + number);
 							output.println("Valid spot is "+Character.toUpperCase(message.charAt(0)) + number+", registered");
-							//spotID = number;
-							//System.out.println("Zone ID : "+zoneID);
-							//System.out.println("Spot ID : "+spotID);
-							//System.out.println("dataStored value was: "+dataStored);
-							//System.out.println("dataStored value changed to "+!dataStored);
 							return true;
 						}
 						else {
@@ -214,14 +188,14 @@ public class parkingServer implements Runnable {
 		}
 		return false;
 	}
-	//Socket socket, BufferedReader input, PrintWriter output
+	
 	public void stop() throws IOException {
 		if (serverSocket != null && !serverSocket.isClosed()) {
 			serverSocket.close();
 			System.out.println("Server stopped.");	
 		}
-
 	}
+	
 	public int getSpotID() {
 		return spotID;
 	}

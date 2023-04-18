@@ -42,7 +42,7 @@ public class ZoneSelectionDialog extends TitleAreaDialog {
 		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		GridLayout layout = new GridLayout(2, false);
 		container.setLayout(layout);
-
+		
 		createSelectZone(container);
 		createSelectAction(container);
 
@@ -52,11 +52,11 @@ public class ZoneSelectionDialog extends TitleAreaDialog {
 	private void createSelectZone(Composite container) {
 		Label lbtSelectZone = new Label(container, SWT.NONE);
 		lbtSelectZone.setText("Select Zone");
-		//Combo box 
+		
 		Combo comboSelectZone= new Combo(container, SWT.BORDER | SWT.DROP_DOWN | SWT.READ_ONLY);
 		comboSelectZone.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		comboSelectZone.setVisibleItemCount(8);
-		// Add items to the combo box
+		
 		for(int i=0; i < lot.getNumberOfZones(); i++) {
 			String str = Character.toString(lot.getZone(i).getZoneLetter());
 			comboSelectZone.add(str);
@@ -76,27 +76,24 @@ public class ZoneSelectionDialog extends TitleAreaDialog {
 
 		Button freeButton = new Button(container, SWT.RADIO);
 		freeButton.setText("Free");
+		
 		occupiedButton.addSelectionListener((SelectionListener) new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				selectedValue = false; // Set selected value to true for occupiedButton
+				selectedValue = false; // Set selected value to false if occupiedButton is selected
 			}
 		});
 		freeButton.addSelectionListener((SelectionListener) new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				selectedValue = true; // Set selected value to true for freeButton
+				selectedValue = true; // Set selected value to true if freeButton is selected
 			}
 		});
 	}
-
-
 
 	@Override
 	protected boolean isResizable() {
 		return true;
 	}
 
-	// save content of combo and radio buttons because they get disposed
-	// as soon as the Dialog closes
 	private void saveInput() {
 		zoneID = comboZone.getSelectionIndex(); 
 		status = selectedValue;
@@ -104,7 +101,7 @@ public class ZoneSelectionDialog extends TitleAreaDialog {
 
 	@Override
 	protected void okPressed() {
-		saveInput();
+		saveInput(); // save selections as soon as dialog is exited
 		super.okPressed();
 	}
 
