@@ -41,10 +41,10 @@ public class parkingSpot {
 		this.status = status;
 		if(status == true) {
 			// set color of button as GREEN when available or RED when occupied
-			button.setBackground(SWTResourceManager.getColor(0, 255, 0));
+			button.setBackground(SWTResourceManager.getColor(30, 255, 30));
 		}
 		else {
-			button.setBackground(SWTResourceManager.getColor(255,0,0));
+			button.setBackground(SWTResourceManager.getColor(255,30,30));
 		}
 	}
 }

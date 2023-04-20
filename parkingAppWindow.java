@@ -4,6 +4,8 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Label;
 
+import java.awt.DisplayMode;
+import java.awt.GraphicsEnvironment;
 import java.io.IOException;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
@@ -25,7 +27,7 @@ public class parkingAppWindow {
 
 	//Shell Dimensions
 	int SHELL_WIDTH = 1450;
-	int SHELL_HEIGHT = 775;
+	int SHELL_HEIGHT = 700;
 
 	protected Shell shlParkingApplication;
 
@@ -81,8 +83,7 @@ public class parkingAppWindow {
 
 		shlParkingApplication = new Shell();
 		shlParkingApplication.setBackground(SWTResourceManager.getColor(73, 104, 175));
-		shlParkingApplication.setSize(SHELL_WIDTH,SHELL_HEIGHT);
-		shlParkingApplication.setText("Parking Application");
+		shlParkingApplication.setText("Par👑King - Parking Management System");
 
 		// Server initialization in separate thread to not interrupt UI thread
 		parkingServer server = new parkingServer(6709, NUM_ZONES, SPOTS_PER_ZONE);
@@ -95,8 +96,22 @@ public class parkingAppWindow {
 		lblWelcomeToOur.setAlignment(SWT.CENTER);
 		lblWelcomeToOur.setForeground(SWTResourceManager.getColor(255, 255, 255));
 		lblWelcomeToOur.setFont(SWTResourceManager.getFont("Gill Sans Ultra Bold", 17, SWT.NORMAL));
-		lblWelcomeToOur.setBounds(10, 10, 314, 49);
-		lblWelcomeToOur.setText("PAR 👑 KING ");
+		lblWelcomeToOur.setBounds(10, 10, 90, 49);
+		lblWelcomeToOur.setText("PAR ");
+		Label lblCrown = new Label(shlParkingApplication, SWT.NONE);
+		lblCrown.setBackground(SWTResourceManager.getColor(73, 104, 175));
+		lblCrown.setAlignment(SWT.CENTER);
+		lblCrown.setForeground(SWTResourceManager.getColor(207,181,59));
+		lblCrown.setFont(SWTResourceManager.getFont("Gill Sans Ultra Bold", 17, SWT.NORMAL));
+		lblCrown.setBounds(100, 7, 40, 49);
+		lblCrown.setText("👑");
+		Label lblKing = new Label(shlParkingApplication, SWT.NONE);
+		lblKing.setBackground(SWTResourceManager.getColor(73, 104, 175));
+		lblKing.setAlignment(SWT.CENTER);
+		lblKing.setForeground(SWTResourceManager.getColor(255, 255, 255));
+		lblKing.setFont(SWTResourceManager.getFont("Gill Sans Ultra Bold", 17, SWT.NORMAL));
+		lblKing.setBounds(133, 10, 120, 49);
+		lblKing.setText(" KING");
 
 		// Text which displays capacity at all times, initialized here and changed on all click events on the parking spots
 		Label lblCapacity = new Label(shlParkingApplication, SWT.NONE);
@@ -137,12 +152,33 @@ public class parkingAppWindow {
 		//creating the scrolled Composite which will display our parking lot
 		ScrolledComposite scrolledComp = new ScrolledComposite(shlParkingApplication, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL);
 		scrolledComp.setAlwaysShowScrollBars(false);
-		scrolledComp.setBounds(10, 60, 1280, 720);
 		scrolledComp.setExpandHorizontal(true);
 		scrolledComp.setExpandVertical(true);
-		//generating height based on No of Zones and Spots per zone, making scroll field "responsive" instead of fixed size
-		int scrollHeight = (((NUM_ZONES+1)/4)*(30+Y_BUTTON_DECREMENT)*((SPOTS_PER_ZONE+1)/2));
-		scrolledComp.setMinSize(1200,scrollHeight);
+
+		//Adapting GUI to smaller monitors if necessary
+		DisplayMode monitor = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDisplayMode();
+		boolean monitorIsSmall = monitor.getWidth() < 1450;
+		int scrollHeight, zonesInRow, selectButtonX = 1000, selectButtonY = 85;
+		if(monitorIsSmall) {
+			shlParkingApplication.setSize(1150, 720);
+			zonesInRow = 3;
+			scrollHeight = ((((NUM_ZONES-1) / zonesInRow) + 1) * (30 + Y_BUTTON_DECREMENT) * ((SPOTS_PER_ZONE + 1) / 2));  //generating height based on No of Zones and Spots per zone, making scroll field "responsive" instead of fixed size
+			scrolledComp.setBounds(10, 60, 950, 600);	
+			scrolledComp.setMinSize(800 , scrollHeight);
+			selectButtonX = 1000;
+			selectButtonY = 200;
+			lblCapacity.setBounds(431, 20, 581, 29);
+
+		}
+		else {
+			shlParkingApplication.setSize(SHELL_WIDTH,SHELL_HEIGHT);
+			zonesInRow = 4;
+			scrollHeight = ((((NUM_ZONES-1) / zonesInRow) + 1) * (30 + Y_BUTTON_DECREMENT) * ((SPOTS_PER_ZONE + 1) / 2));  
+			scrolledComp.setBounds(10, 60, 1280, 550);
+			scrolledComp.setMinSize(1200 , scrollHeight);
+			selectButtonX = 1313;
+			selectButtonY = 200;
+		}
 
 		//child Composite as wrapper object to hold multiple buttons as required by scrolledComposite
 		Composite content = new Composite(scrolledComp, SWT.NONE);
@@ -162,19 +198,16 @@ public class parkingAppWindow {
 		 * When we create 4 zones, the startingX is reset and the startingY is modified to display the next row of zones below the first one.
 		 */
 		int buttonX=0, buttonY=0;
-		char[] zoneLetter = {'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'};
 		buttonY=startingY;
 
 		for(int i=0; i < NUM_ZONES; i++) {
-			if(i%4==0 && i!=0) {
+			if(i % zonesInRow == 0 && i != 0) {
 				startingX = 60; // resetting X to starting X
 				startingY = startingY + Y_ZONE_INCREMENT; // setting the startingY lower to create the second row below the first one
 				buttonY=startingY;
 			}
 			for(int j=0; j < SPOTS_PER_ZONE; j++) {
-				//creation of the parking spot buttons consists of the 
-				//position of the button, its association with a parking spot, 
-				//and the addition of the mouseListener
+				//creation of the parking spot buttons 
 				Button btnA = new Button(content, SWT.NONE);
 				if( j%2 == 0 ) {
 					buttonX=startingX;
@@ -187,13 +220,13 @@ public class parkingAppWindow {
 				}
 				//setting button color
 				if(lot.getZone(i).getSpot(j).isAvailable()) {
-					btnA.setBackground(SWTResourceManager.getColor(0, 255, 0));
+					btnA.setBackground(SWTResourceManager.getColor(30, 255, 30));
 				}
 				else {
-					btnA.setBackground(SWTResourceManager.getColor(255,0,0));
+					btnA.setBackground(SWTResourceManager.getColor(255,30,30));
 				}
 				btnA.setBounds(buttonX, buttonY, 90, 30);
-				btnA.setText(zoneLetter[i]+" "+ (j+1)); // button text is ZoneID + SpotID
+				btnA.setText(lot.getZone(i).getZoneLetter()+" "+(j+1)); // button text is ZoneID + SpotID
 
 				final int innerI = i;
 				final int innerJ = j;
@@ -215,7 +248,7 @@ public class parkingAppWindow {
 		//RESET : Button which clears all occupied spots
 		Button btnClearAll = new Button(shlParkingApplication, SWT.NONE);
 		btnClearAll.setFont(SWTResourceManager.getFont("Segoe UI", 10, SWT.BOLD));
-		btnClearAll.setBounds(1313, 85, 90, 30);
+		btnClearAll.setBounds(selectButtonX, selectButtonY, 90, 30);
 		btnClearAll.setText("RESET");
 		btnClearAll.addMouseListener(new MouseAdapter() {
 			@Override
@@ -243,30 +276,30 @@ public class parkingAppWindow {
 		//SELECT ZONE : Button selecting a zone, then setting all selected spots to free or occupied.		
 		Button btnSelectZone = new Button(shlParkingApplication, SWT.NONE);
 		btnSelectZone.setFont(SWTResourceManager.getFont("Segoe UI", 10, SWT.BOLD));
-		btnSelectZone.setBounds(1300, 163, 120, 30);
+		btnSelectZone.setBounds(selectButtonX - 13, selectButtonY + 80, 120, 30);
 		btnSelectZone.setText("SELECT ZONE");
 		btnSelectZone.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseDown(MouseEvent e) {
 				ZoneSelectionDialog dialog = new ZoneSelectionDialog(shlParkingApplication, lot); // Calling a dialog that returns a zoneID and status
-				
+
 				if(dialog.open() == Window.OK) { 
 					lot.getZone(dialog.getZoneID()).setZoneStatus(dialog.getStatus());
 				}
 				lot.updateCurrentCapacity(lblCapacity); // Updating the capacity meter	
 			}	
 		});
-	
+
 		Button btnLotSettings = new Button(shlParkingApplication, SWT.NONE);
 		btnLotSettings.setFont(SWTResourceManager.getFont("Segoe UI", 10, SWT.BOLD));
-		btnLotSettings.setBounds(1298, 252, 125, 30);
+		btnLotSettings.setBounds(selectButtonX - 15, selectButtonY + 160, 125, 30);
 		btnLotSettings.setText("LOT SETTINGS");
 		btnLotSettings.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseDown(MouseEvent e) {
-				
+
 				LotSettingsDialog dialog = new LotSettingsDialog(shlParkingApplication); // Calling a dialog that returns num_zones and spots_per_zone 
-				
+
 				if(dialog.open() == Window.OK) {
 					//If user clicks OK, re-run application with new parameters
 					closeApp = false;

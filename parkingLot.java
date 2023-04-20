@@ -1,6 +1,7 @@
 package Parking;
 
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.wb.swt.SWTResourceManager;
 
 public class parkingLot {
 
@@ -30,7 +31,12 @@ public class parkingLot {
 		for(int i=0; i < numberOfZones; i++) {
 			sum = sum + zones[i].getZoneOccupiedSpots();
 		}
-		lbl.setText("CURRENTLY OCCUPIED: "+(Math.round((sum*100)/maxCapacity*100.0)/100.0)+"% CAPACITY"); // limit capacity value to 2 decimal places 
+		double currentCapacity = Math.round((sum*100)/maxCapacity*100.0)/100.0;
+		lbl.setText("CURRENTLY OCCUPIED: "+currentCapacity+"% CAPACITY"); // limit capacity value to 2 decimal places 
+		if(currentCapacity >= 90) {
+			lbl.setForeground(SWTResourceManager.getColor(255,50,50));
+		}
+		else lbl.setForeground(SWTResourceManager.getColor(255,255,255));
 	}
 
 	public parkingZone getZone(int index) {
