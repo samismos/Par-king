@@ -18,6 +18,6 @@ Functional server implementation.
 
 This project was my first contact with - among other things - multithreading, custom events, eventListeners and eventHandlers, TCP client/server communication and message filtering.   
 
-I am thrilled to upload this, since I have basically finished the application, and only some final touches remain to be added. This was the product of one exhausting but incredibly rewarding week.
+I am thrilled to upload this, since I have basically finished the application, and only some final touches remain to be added. This was the product of two exhausting but incredibly rewarding weeks.
 
 Par👑King Application created by Samouil Mosios
