@@ -54,6 +54,7 @@ public class parkingAppWindow {
 		createContents(display, NUM_ZONES, SPOTS_PER_ZONE);
 		shlParkingApplication.open();
 		shlParkingApplication.layout();
+		
 		while (!shlParkingApplication.isDisposed()) {
 			if (!display.readAndDispatch()) {
 				display.sleep();
@@ -81,7 +82,7 @@ public class parkingAppWindow {
 		//Y_ZONE_INCREMENT is the VERTICAL DISTANCE BETWEEN TWO PARKING ZONES
 		int Y_ZONE_INCREMENT = (SPOTS_PER_ZONE/2)*60;
 
-		shlParkingApplication = new Shell();
+		shlParkingApplication = new Shell(SWT.SHELL_TRIM & ~ SWT.RESIZE);
 		shlParkingApplication.setBackground(SWTResourceManager.getColor(73, 104, 175));
 		shlParkingApplication.setText("Par👑King - Parking Management System");
 
