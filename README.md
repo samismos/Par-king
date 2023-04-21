@@ -1,6 +1,8 @@
 # Par-king
 Parking management application created using Java and JFace/SWT
 
+LINK FOR APP:  https://drive.google.com/file/d/1Ynm8nKTy_r5vN6BhvjAkh_EGdRY5cHiA/view?usp=share_link
+
 This is a project created as an assignment for an Object-Oriented Programming module. 
 It began as a simple desktop parking management system which implemented a GUI to manage and see the parking spots and their availability,
 but in the process of development more complex features were added. 
@@ -18,6 +20,6 @@ Functional server implementation.
 
 This project was my first contact with - among other things - multithreading, custom events, eventListeners and eventHandlers, TCP client/server communication and message filtering.   
 
-I am thrilled to upload this, since I have basically finished the application, and only some final touches remain to be added. This was the product of one exhausting but incredibly rewarding week.
+I am thrilled to upload this, since I have basically finished the application, and only some final touches remain to be added. This was the product of two exhausting but incredibly rewarding weeks.
 
 Par👑King Application created by Samouil Mosios
