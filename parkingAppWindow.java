@@ -54,7 +54,7 @@ public class parkingAppWindow {
 		createContents(display, NUM_ZONES, SPOTS_PER_ZONE);
 		shlParkingApplication.open();
 		shlParkingApplication.layout();
-		
+
 		while (!shlParkingApplication.isDisposed()) {
 			if (!display.readAndDispatch()) {
 				display.sleep();
@@ -82,7 +82,11 @@ public class parkingAppWindow {
 		//Y_ZONE_INCREMENT is the VERTICAL DISTANCE BETWEEN TWO PARKING ZONES
 		int Y_ZONE_INCREMENT = (SPOTS_PER_ZONE/2)*60;
 
+		//ZONE_HEIGHT 
+		int ZONE_HEIGHT = Y_BUTTON_DECREMENT * ((SPOTS_PER_ZONE + 1) / 2);
+
 		shlParkingApplication = new Shell(SWT.SHELL_TRIM & ~ SWT.RESIZE);
+		shlParkingApplication.setSize(958, 632);
 		shlParkingApplication.setBackground(SWTResourceManager.getColor(73, 104, 175));
 		shlParkingApplication.setText("Par👑King - Parking Management System");
 
@@ -163,7 +167,7 @@ public class parkingAppWindow {
 		if(monitorIsSmall) {
 			shlParkingApplication.setSize(1150, 720);
 			zonesInRow = 3;
-			scrollHeight = ((((NUM_ZONES-1) / zonesInRow) + 1) * (30 + Y_BUTTON_DECREMENT) * ((SPOTS_PER_ZONE + 1) / 2));  //generating height based on No of Zones and Spots per zone, making scroll field "responsive" instead of fixed size
+			scrollHeight = (((NUM_ZONES-1) / zonesInRow) * ( ZONE_HEIGHT + Y_ZONE_INCREMENT));  //generating height based on No of Zones and Spots per zone, making scroll field "responsive" instead of fixed size
 			scrolledComp.setBounds(10, 60, 950, 600);	
 			scrolledComp.setMinSize(800 , scrollHeight);
 			selectButtonX = 1000;
@@ -174,7 +178,7 @@ public class parkingAppWindow {
 		else {
 			shlParkingApplication.setSize(SHELL_WIDTH,SHELL_HEIGHT);
 			zonesInRow = 4;
-			scrollHeight = ((((NUM_ZONES-1) / zonesInRow) + 1) * (30 + Y_BUTTON_DECREMENT) * ((SPOTS_PER_ZONE + 1) / 2));  
+			scrollHeight = (((NUM_ZONES-1) / zonesInRow) * ( ZONE_HEIGHT + Y_ZONE_INCREMENT));  
 			scrolledComp.setBounds(10, 60, 1280, 550);
 			scrolledComp.setMinSize(1200 , scrollHeight);
 			selectButtonX = 1313;
@@ -228,6 +232,9 @@ public class parkingAppWindow {
 				}
 				btnA.setBounds(buttonX, buttonY, 90, 30);
 				btnA.setText(lot.getZone(i).getZoneLetter()+" "+(j+1)); // button text is ZoneID + SpotID
+				Label horizontalSeparator = new Label(content, SWT.SEPARATOR | SWT.HORIZONTAL);
+				horizontalSeparator.setText("HorizontalSeparator");
+				horizontalSeparator.setBounds(buttonX-3, buttonY+33, 98, 3);
 
 				final int innerI = i;
 				final int innerJ = j;
@@ -242,8 +249,20 @@ public class parkingAppWindow {
 				});
 				lot.getZone(i).getSpot(j).setButton(btnA);
 			}
-			startingX = startingX + X_ZONE_INCREMENT;
-			buttonY = startingY;
+			if(SPOTS_PER_ZONE%2 != 0) {
+				Label verticalSeparator = new Label(content, SWT.SEPARATOR | SWT.VERTICAL);
+				verticalSeparator.setText("VerticalSeparator");
+				verticalSeparator.setBounds(buttonX+93, buttonY-5, 5, ZONE_HEIGHT);
+				buttonY = startingY;
+				startingX = startingX + X_ZONE_INCREMENT;
+			}
+			else {
+				Label verticalSeparator = new Label(content, SWT.SEPARATOR | SWT.VERTICAL);
+				verticalSeparator.setText("VerticalSeparator");
+				verticalSeparator.setBounds(buttonX-8, buttonY-5, 5, ZONE_HEIGHT);
+				buttonY = startingY;
+				startingX = startingX + X_ZONE_INCREMENT;
+			}
 		}
 
 		//RESET : Button which clears all occupied spots
